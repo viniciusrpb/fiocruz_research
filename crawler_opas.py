@@ -35,7 +35,10 @@ while page <= MAX_PAGES:
 
     links = container.find_elements(By.XPATH, './/a[starts-with(@href, "/pt/noticias/")]')
 
-    news_links = [link.get_attribute("href") for link in links]
+    news_links = []
+    for link in links:
+        if link not in news_links:
+            news_links.append(link.get_attribute("href"))
 
     print(f'Links encontrados: {len(news_links)}')
 
