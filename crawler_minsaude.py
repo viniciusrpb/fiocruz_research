@@ -20,9 +20,9 @@ page = 0
 
 MAX_PAGES = 30
 
-while page <= 8*MAX_PAGES:
+while page <= MAX_PAGES:
 
-    NEWS_URL = "https://portal.conasems.org.br/noticias?rows=8&start="+str(page)
+    NEWS_URL = "https://www.gov.br/saude/pt-br/assuntos/noticias?b_start:int="+str(page)
     driver.get(NEWS_URL)
 
     print(f'Page: {page}')
@@ -30,17 +30,15 @@ while page <= 8*MAX_PAGES:
 
     wait = WebDriverWait(driver, 10)
 
-    if page == 0:
+    container_xpath = '//*[@id="content-core"]'
+    container = wait.until(EC.presence_of_element_located((By.XPATH, container_xpath)))
 
-        links = driver.find_elements(By.XPATH, '//a[contains(@class, "w-full") and starts-with(@href, "/noticias/")]')
-    else:
-        container_xpath = '//*[@id="__next"]/section[5]'
-        container = wait.until(EC.presence_of_element_located((By.XPATH, container_xpath)))
+    links = container.find_elements(By.XPATH, './/a[starts-with(@href, "https://www.gov.br/saude/pt-br/assuntos/noticias/")]')
 
-        links = container.find_elements(By.XPATH, './/a[starts-with(@href, "/noticias/")]')
-
-
-    news_links = [link.get_attribute("href") for link in links]
+    news_links = []
+    for link in links:
+        if link not in news_links:
+            news_links.append(link.get_attribute("href"))
 
     print(f'Links encontrados: {len(news_links)}')
 
@@ -50,11 +48,11 @@ while page <= 8*MAX_PAGES:
 
         driver.get(link)
 
-        titulo = driver.find_element(By.XPATH, '//*[@id="__next"]/section[3]/div/h1').text
+        titulo = driver.find_element(By.XPATH, '//*[@id="content"]/article/h1').text
 
-        #data = driver.find_element(By.XPATH,'//*[@id="__next"]/section[4]/div/div/p[2]').text
+        data = driver.find_element(By.XPATH,'//*[@id="content"]/article/div[1]').text
 
-        content = driver.find_element(By.XPATH,'//*[@id="__next"]/section[4]/div/div/section').text
+        content = driver.find_element(By.XPATH,'//*[@id="content-core"]').text
 
         print(titulo)
         #print(data)
@@ -69,10 +67,10 @@ while page <= 8*MAX_PAGES:
     #    print("Conteúdo:", news["content"][:500], "...")
     #    print("Link:", news["url"])
 
-    page+=8
+    page+=15
 
 driver.quit()
 
 df = pd.DataFrame(news_data)
 
-df.to_csv("conasam.csv", sep=';',index=False, encoding="utf-8")
+df.to_csv("min_saude.csv", sep=';',index=False, encoding="utf-8")

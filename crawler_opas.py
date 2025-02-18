@@ -20,9 +20,9 @@ page = 0
 
 MAX_PAGES = 30
 
-while page <= 8*MAX_PAGES:
+while page <= MAX_PAGES:
 
-    NEWS_URL = "https://portal.conasems.org.br/noticias?rows=8&start="+str(page)
+    NEWS_URL = "https://www.paho.org/pt/news?page="+str(page)
     driver.get(NEWS_URL)
 
     print(f'Page: {page}')
@@ -30,15 +30,10 @@ while page <= 8*MAX_PAGES:
 
     wait = WebDriverWait(driver, 10)
 
-    if page == 0:
+    container_xpath = '//*[@id="paho-main"]/div[2]/div/section/div/div/div/div[2]'
+    container = wait.until(EC.presence_of_element_located((By.XPATH, container_xpath)))
 
-        links = driver.find_elements(By.XPATH, '//a[contains(@class, "w-full") and starts-with(@href, "/noticias/")]')
-    else:
-        container_xpath = '//*[@id="__next"]/section[5]'
-        container = wait.until(EC.presence_of_element_located((By.XPATH, container_xpath)))
-
-        links = container.find_elements(By.XPATH, './/a[starts-with(@href, "/noticias/")]')
-
+    links = container.find_elements(By.XPATH, './/a[starts-with(@href, "/pt/noticias/")]')
 
     news_links = [link.get_attribute("href") for link in links]
 
@@ -50,11 +45,11 @@ while page <= 8*MAX_PAGES:
 
         driver.get(link)
 
-        titulo = driver.find_element(By.XPATH, '//*[@id="__next"]/section[3]/div/h1').text
+        titulo = driver.find_element(By.XPATH, '//*[@id="paho-main"]/div[2]/div/section/div/h1/span').text
 
         #data = driver.find_element(By.XPATH,'//*[@id="__next"]/section[4]/div/div/p[2]').text
 
-        content = driver.find_element(By.XPATH,'//*[@id="__next"]/section[4]/div/div/section').text
+        content = driver.find_element(By.XPATH,'//*[@id="paho-main"]/div[2]/div/section/div/article/div').text
 
         print(titulo)
         #print(data)
@@ -75,4 +70,4 @@ driver.quit()
 
 df = pd.DataFrame(news_data)
 
-df.to_csv("conasam.csv", sep=';',index=False, encoding="utf-8")
+df.to_csv("opas.csv", index=False, sep=';',encoding="utf-8")
